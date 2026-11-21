@@ -1,0 +1,21 @@
+{
+  "appId": "com.boss777.hub",
+  "appName": "BOSS777",
+  "webDir": "www",
+  "backgroundColor": "#0b0e17",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#0b0e17",
+      "launchShowDuration": 0,
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "backgroundColor": "#0b0e17",
+      "style": "DARK",
+      "overlaysWebView": false
+    }
+  }
+}
