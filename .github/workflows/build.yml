@@ -1,0 +1,79 @@
+name: Build Native Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare Web Directory & Assets
+        run: |
+          rm -rf www assets
+          mkdir -p www assets
+
+          for item in *; do
+            case "$item" in
+              "www"|"assets"|"android"|"node_modules") continue ;;
+              *) cp -r "$item" www/ ;;
+            esac
+          done
+
+          if [ -f logo.png ]; then
+            cp logo.png assets/icon-only.png
+            cp logo.png assets/icon-foreground.png
+            cp logo.png assets/icon-background.png
+            cp logo.png assets/icon.png
+          else
+            printf '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" fill="#0b0e17"/></svg>' > assets/icon.png
+          fi
+
+          printf '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732" width="2732" height="2732"><rect width="2732" height="2732" fill="#0b0e17"/></svg>' > assets/splash.svg
+          cp assets/splash.svg assets/splash-dark.svg
+
+      - name: Install Capacitor & Plugins
+        run: |
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+          npm install --no-audit --no-fund @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets @capacitor/app @capacitor/status-bar
+
+      - name: Sync Android Project
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+          npx @capacitor/assets generate --android --iconBackgroundColor "#0b0e17" --splashBackgroundColor "#0b0e17" || true
+          npx cap sync android
+
+      - name: Apply Dark Status Bar Across Android Versions
+        run: node scripts/fix-android-bar.js
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOSS777-Native-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
