@@ -36,24 +36,7 @@ jobs:
             cp logo.png assets/icon-foreground.png
             cp logo.png assets/icon-background.png
             cp logo.png assets/icon.png
-          else
-            cat << 'EOF' > assets/icon.png
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" fill="#ffffff"/></svg>
-EOF
-          fi
-
-          cat << 'EOF' > assets/splash.svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732" width="2732" height="2732">
-  <rect width="2732" height="2732" fill="#FFFFFF"/>
-</svg>
-EOF
-
-          cat << 'EOF' > assets/splash-dark.svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732" width="2732" height="2732">
-  <rect width="2732" height="2732" fill="#FFFFFF"/>
-</svg>
-EOF
-
+          
       - name: Install Capacitor Dependencies
         run: |
           if [ ! -f package.json ]; then
